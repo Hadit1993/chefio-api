@@ -1,0 +1,12 @@
+export const DB_HOST = process.env.DB_HOST;
+export const DB_PORT = parseInt(process.env.DB_PORT ?? "3306");
+export const DB_USER = process.env.DB_USER;
+export const DB_PASSWORD = process.env.DB_PASSWORD;
+export const DB_NAME = process.env.DB_NAME;
+export const PORT = parseInt(process.env.PORT ?? "4000");
+export const IMAGE_KIT_PUBLIC_KEY = process.env.IMAGE_KIT_PUBLIC_KEY;
+export const IMAGE_KIT_PRIVATE_KEY = process.env.IMAGE_KIT_PRIVATE_KEY;
+export const IMAGE_KIT_URL_ENDPOINT = process.env.IMAGE_KIT_URL_ENDPOINT;
+export const EMAIL_ADDRESS = process.env.EMAIL_ADDRESS;
+export const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+export const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
