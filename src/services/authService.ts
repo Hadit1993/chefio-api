@@ -5,6 +5,7 @@ import {
   EXPIRED_VERIFICATION_CODE,
   INCORRECT_EMAIL_OR_PASSWORD,
   INCORRECT_VERIFICATION_CODE,
+  NOT_VERIFIED_ACCOUNT,
   NO_USER_EMAIL,
 } from "../constants/messages";
 import {
@@ -86,6 +87,7 @@ async function login(input: LoginDto) {
   const user = await userRepository.findUserByEmail(input.email);
   const error = new HttpError(INCORRECT_EMAIL_OR_PASSWORD, 400);
   if (!user) throw error;
+  if (!user.userVerified) throw new HttpError(NOT_VERIFIED_ACCOUNT, 400);
   const isValidPassword = await bcrypt.compare(input.password, user.password);
   if (!isValidPassword) throw error;
   const token = generateJWTToken(user.userId);

@@ -8,6 +8,6 @@ export default function handleQuery(query: string, values: any) {
         return reject(new HttpError(error.message, 400));
       } else return resolve(result);
     });
-    dbConnection.end();
+    // dbConnection.end();
   });
 }

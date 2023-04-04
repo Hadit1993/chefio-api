@@ -20,7 +20,7 @@ authRouter.post(
 );
 
 authRouter.post(
-  "signup/activation-account",
+  "/signup/activation-account",
   validationMiddleware(validateEmailAndOTP),
   authController.activateAccount
 );

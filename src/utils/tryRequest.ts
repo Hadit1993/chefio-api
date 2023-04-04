@@ -1,4 +1,4 @@
-import { Controller, Middleware } from "./commonTypes";
+import { Middleware } from "./commonTypes";
 
 export default function tryRequest<ReqBody = any>(
   controller: Middleware<ReqBody>

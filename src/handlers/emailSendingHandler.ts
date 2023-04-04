@@ -9,6 +9,8 @@ export default function sendEmail(
 ) {
   const transporter = nodemailer.createTransport({
     service: "gmail",
+    host: "smtp.gmail.com",
+    secure: true,
     auth: {
       user: EMAIL_ADDRESS,
       pass: EMAIL_PASSWORD,
@@ -18,7 +20,10 @@ export default function sendEmail(
   const mailOptions = {
     from: EMAIL_ADDRESS,
     to: recipientEmail,
-    subject: "Chefio Activation Email",
+    subject:
+      type === "account-activation"
+        ? "Chefio Activation Email"
+        : "Chefio Password Recovery",
     html:
       type === "account-activation"
         ? generateHtmlForAccountActivation(verificationCode)

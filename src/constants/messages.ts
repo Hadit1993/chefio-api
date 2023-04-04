@@ -16,3 +16,5 @@ export const SUCCESSFUL_RESET_PASSWORD =
   "Your password has reset successfully.";
 export const INCORRECT_EMAIL_OR_PASSWORD =
   "One of your email or password is incorrect.";
+
+export const NOT_VERIFIED_ACCOUNT = "Your account has not verified yet.";

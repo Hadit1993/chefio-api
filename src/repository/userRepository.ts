@@ -1,7 +1,7 @@
 import { RegisterUserDTO } from "../dtos/authDTOs";
 import handleQuery from "../handlers/queryHandler";
 import UserEntity from "../entities/userEntity";
-import { transformToUserEntity } from "../transformers/userTransformer";
+import { snakeToCamel } from "../transformers/snakeToCamelTransformer";
 
 async function findUserByEmail(email: string): Promise<UserEntity | undefined> {
   const result = (await handleQuery(
@@ -9,7 +9,7 @@ async function findUserByEmail(email: string): Promise<UserEntity | undefined> {
     email
   )) as any[];
   if (result.length === 0) return undefined;
-  else return transformToUserEntity(result[0]);
+  else return snakeToCamel(result[0]);
 }
 
 async function updateOtpPass(email: string, otpPass: number, otpExpDate: Date) {
@@ -42,7 +42,7 @@ async function resetPassword(email: string, password: string) {
 
 async function addUser(user: RegisterUserDTO): Promise<void> {
   await handleQuery(
-    "INSERT INTO users (email, username, password, profile_image,) VALUES(?, ?, ?, ?)",
+    "INSERT INTO users (email, username, password, profile_image) VALUES(?, ?, ?, ?)",
     [user.email, user.username, user.password, user.profileImage]
   );
 }

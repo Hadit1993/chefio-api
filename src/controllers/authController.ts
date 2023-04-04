@@ -14,7 +14,7 @@ import {
 } from "../constants/messages";
 
 const signup = tryRequest<RegisterUserDTO>(async (req, res, _) => {
-  await authService.register(req.body);
+  await authService.register(req.body, req.file);
   res
     .status(201)
     .json(new BaseResponse(undefined, { message: SUCCESSFUL_REGISTER }));
