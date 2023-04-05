@@ -18,3 +18,14 @@ export const INCORRECT_EMAIL_OR_PASSWORD =
   "One of your email or password is incorrect.";
 
 export const NOT_VERIFIED_ACCOUNT = "Your account has not verified yet.";
+
+export const RESET_PASSWORD_NOT_ALLOWED =
+  "Reset password is not allowed without verification.";
+
+export const INGREDIENT_ADDED = "Ingredient added successfully.";
+
+export const DUPLICATE_INGREDIENT =
+  "An ingredient with this name already exists.";
+
+export const INVALID_AUTHENTICATION =
+  "Authorization header is missing or does not contain a valid bearer token.";

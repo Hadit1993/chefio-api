@@ -7,6 +7,7 @@ import {
   INCORRECT_VERIFICATION_CODE,
   NOT_VERIFIED_ACCOUNT,
   NO_USER_EMAIL,
+  RESET_PASSWORD_NOT_ALLOWED,
 } from "../constants/messages";
 import {
   ActivateAccountDTO,
@@ -74,8 +75,9 @@ async function verifyResetPassword(input: ActivateAccountDTO) {
 async function resetPassword(input: LoginDto) {
   const user = await userRepository.findUserByEmail(input.email);
   if (!user) throw new HttpError(NO_USER_EMAIL, 400);
+  if (!user.passExpDate) throw new HttpError(RESET_PASSWORD_NOT_ALLOWED, 400);
   const currentDate = new Date();
-  if (currentDate.getTime() > user.passExpDate!.getTime())
+  if (currentDate.getTime() > user.passExpDate.getTime())
     throw new HttpError(EXPIRED_RESET_PASSWORD, 400);
 
   const salt = await bcrypt.genSalt(10);

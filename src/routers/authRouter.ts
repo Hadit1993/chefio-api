@@ -34,22 +34,26 @@ authRouter.post(
 
 authRouter.post(
   "/reset-password/request",
-  validateEmail,
+  validationMiddleware(validateEmail),
   authController.requestResetPassword
 );
 
 authRouter.post(
   "/reset-password/verify",
-  validateEmailAndOTP,
+  validationMiddleware(validateEmailAndOTP),
   authController.verifyResetPassword
 );
 
 authRouter.post(
   "/reset-password",
-  validateEmailAndPass,
+  validationMiddleware(validateEmailAndPass),
   authController.resetPassword
 );
 
-authRouter.post("login", validateEmailAndPass, authController.login);
+authRouter.post(
+  "/login",
+  validationMiddleware(validateEmailAndPass),
+  authController.login
+);
 
 export default authRouter;
