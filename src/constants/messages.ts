@@ -29,3 +29,7 @@ export const DUPLICATE_INGREDIENT =
 
 export const INVALID_AUTHENTICATION =
   "Authorization header is missing or does not contain a valid bearer token.";
+
+export const START_STEP_NUMBER = "Step numbers should start from 1";
+
+export const NON_SEQUENTIAL_STEP_NUMBER = "Step numbers should be sequential";

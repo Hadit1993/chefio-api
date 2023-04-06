@@ -1,7 +1,7 @@
 import { ValidationResult } from "joi";
 
 import { Middleware, HttpError } from "../utils/commonTypes";
-import transformJoiErrror from "../transformers/joiTransformer";
+import transformJoiError from "../transformers/joiTransformer";
 
 export default function validationMiddleware<T>(
   validator: (reqBody: T) => ValidationResult
@@ -13,11 +13,11 @@ export default function validationMiddleware<T>(
         new HttpError(
           "some inputs are invalid",
           422,
-          transformJoiErrror(result.error)
+          transformJoiError(result.error)
         )
       );
     }
-
+    console.log("validation result", result.error?.details);
     return next();
   };
 }
