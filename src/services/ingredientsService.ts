@@ -17,5 +17,19 @@ function getAllIngredients(): Promise<IngredientEntity[]> {
   return ingredientsRepository.findAllIngredients();
 }
 
-const ingredientsService = { addIngredient, getAllIngredients };
+async function findOrCreateIngredient(name: string): Promise<number> {
+  const ingredientName = capitalizeFirstLetter(name);
+  const existedIngredient: any =
+    await ingredientsRepository.findIngredientByName(ingredientName);
+  if (existedIngredient) return existedIngredient.ingredient_id;
+
+  return ingredientsRepository.addIngredient(ingredientName);
+}
+
+const ingredientsService = {
+  addIngredient,
+  getAllIngredients,
+  findOrCreateIngredient,
+};
+
 export default ingredientsService;

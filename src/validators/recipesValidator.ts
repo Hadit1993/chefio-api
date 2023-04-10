@@ -1,5 +1,5 @@
-import Joi from "joi";
-import { CreateRecipeDTO } from "../dtos/recipeDTOS";
+import Joi, { object } from "joi";
+import { CreateRecipeDTO, RecipeFilterDTO } from "../dtos/recipeDTOS";
 import {
   NON_SEQUENTIAL_STEP_NUMBER,
   START_STEP_NUMBER,
@@ -62,4 +62,16 @@ export function validateRecipe(recipe: CreateRecipeDTO) {
     .messages({ stepNumber: "{{#message}}" })
     .options({ abortEarly: false })
     .validate(recipe);
+}
+
+export function validateRecipeFilters(filters: RecipeFilterDTO) {
+  return Joi.object({
+    page: Joi.number().integer().positive().min(1),
+    limit: Joi.number().integer().positive().min(10),
+    owner: Joi.number().integer().positive().min(1),
+    category: Joi.string().valid("food", "drink", "appetizer", "dessert"),
+    duration: Joi.number().integer().positive().min(5),
+  })
+    .options({ abortEarly: false })
+    .validate(filters);
 }

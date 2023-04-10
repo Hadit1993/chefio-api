@@ -19,11 +19,12 @@ async function findAllIngredients(): Promise<IngredientEntity[]> {
   return result.map((ing) => snakeToCamel(ing));
 }
 
-async function addIngredient(name: string): Promise<void> {
-  await handleQuery(
+async function addIngredient(name: string): Promise<number> {
+  const result: any = await handleQuery(
     "INSERT INTO ingredients (ingredient_name) VALUES(?)",
     name
   );
+  return result.insertId;
 }
 
 const ingredientsRepository = {

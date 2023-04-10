@@ -1,17 +1,17 @@
 import { ValidationResult } from "joi";
-
-import { Middleware, HttpError } from "../utils/commonTypes";
 import transformJoiError from "../transformers/joiTransformer";
+import { Middleware, HttpError } from "../utils/commonTypes";
 
-export default function validationMiddleware<T>(
-  validator: (reqBody: T) => ValidationResult
-): Middleware<T> {
+export default function queryParamsValidationMiddleware(
+  validator: (queryParams: any) => ValidationResult
+): Middleware {
   return async (req, _, next) => {
-    const result = validator(req.body);
+    const result = validator(req.query);
+
     if (result.error) {
       next(
         new HttpError(
-          "some inputs are invalid",
+          "some query params are invalid",
           422,
           transformJoiError(result.error)
         )

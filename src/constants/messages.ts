@@ -30,6 +30,16 @@ export const DUPLICATE_INGREDIENT =
 export const INVALID_AUTHENTICATION =
   "Authorization header is missing or does not contain a valid bearer token.";
 
-export const START_STEP_NUMBER = "Step numbers should start from 1";
+export const START_STEP_NUMBER = "Step numbers must start from 1.";
 
-export const NON_SEQUENTIAL_STEP_NUMBER = "Step numbers should be sequential";
+export const NON_SEQUENTIAL_STEP_NUMBER = "Step numbers must be sequential.";
+
+export const MAX_FILES =
+  "Sorry, you can only upload a maximum of 6 files at a time.";
+
+export const RECIPE_CREATED = "Your recipe has been created successfully.";
+
+export const INVALID_FILE_FIELD =
+  "Invalid field name. Please make sure that the field name of the uploaded image file is either 'recipeCoverImage' or 'stepXImage', where X is the step number.";
+
+export const REQUIRED_RECIPE_IMAGE = "recipeCoverImage is required.";
