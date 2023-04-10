@@ -100,7 +100,7 @@ async function findAllRecipes(
 async function findRecipeById(recipeId: number) {
   const result = (await handleQuery(
     `
-  SELECT r.*, u.user_id as user_id, u.username as username, u.profile_image as profile_image , i.ingredient_name AS ingredient_name, ri.amount, ri.unit, rs.step_number, rs.step_description, rs.step_image
+  SELECT r.*, u.user_id, u.username, u.profile_image , i.ingredient_name, ri.amount, ri.unit, rs.step_number, rs.step_description, rs.step_image
   FROM recipes r
   JOIN users u ON r.recipe_owner = u.user_id
   JOIN recipe_ingredients ri ON r.recipe_id = ri.recipe_id
