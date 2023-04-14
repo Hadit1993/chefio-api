@@ -1,4 +1,9 @@
-import { REQUIRED_RECIPE_IMAGE } from "../constants/messages";
+import {
+  NO_RECIPE_FOUND,
+  RECIPE_ALREADY_LIKED,
+  REQUIRED_RECIPE_IMAGE,
+} from "../constants/messages";
+import { LikeDTO } from "../dtos/likeDto";
 import {
   CreateRecipeDTO,
   RecipeFilterDTO,
@@ -29,7 +34,6 @@ async function addRecipe(
   );
   recipe.recipeCoverImage = recipeCoverImageUrl;
   const recipeId = await recipesRepository.addRecipe(recipe);
-  console.log("recipeId", recipeId);
 
   for (const ingredient of recipe.ingredients) {
     await addRecipeIngredient(ingredient, recipeId);
@@ -81,10 +85,32 @@ function findAllRecipes(filter: RecipeFilterDTO): Promise<RecipeResultDTO[]> {
   return recipesRepository.findAllRecipes(filter);
 }
 
-function findRecipeById(recipeId: number) {
-  return recipesRepository.findRecipeById(recipeId);
+async function findRecipeById(recipeId: number) {
+  const recipe = await recipesRepository.findRecipeDetailById(recipeId);
+  if (!recipe) throw new HttpError(NO_RECIPE_FOUND, 404);
+  return recipe;
 }
 
-const recipesService = { addRecipe, findAllRecipes, findRecipeById };
+async function likeRecipe(like: LikeDTO) {
+  const recipe = await recipesRepository.findRecipeById(like.recipeId);
+  if (!recipe) throw new HttpError(NO_RECIPE_FOUND, 400);
+  const isLikeExists = await recipesRepository.checkIfLikeExists(like);
+  if (isLikeExists) throw new HttpError(RECIPE_ALREADY_LIKED, 400);
+  await recipesRepository.likeRecipe(like, recipe.recipeOwner);
+}
+
+async function unlikeRecipe(like: LikeDTO) {
+  const recipe = await recipesRepository.findRecipeById(like.recipeId);
+  if (!recipe) throw new HttpError(NO_RECIPE_FOUND, 400);
+  await recipesRepository.unlikeRecipe(like, recipe.recipeOwner);
+}
+
+const recipesService = {
+  addRecipe,
+  findAllRecipes,
+  findRecipeById,
+  likeRecipe,
+  unlikeRecipe,
+};
 
 export default recipesService;

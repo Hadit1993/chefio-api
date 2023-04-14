@@ -11,3 +11,18 @@ export default function handleQuery(query: string, values: any): Promise<any> {
     });
   });
 }
+
+export function handleQueryInTransaction(
+  query: string,
+  values: any
+): Promise<any> {
+  return new Promise((resolve, reject) => {
+    dbConnection.query(query, values, (error, result, _) => {
+      if (error) {
+        return dbConnection.rollback(() => {
+          return reject(new HttpError(error.message, 400));
+        });
+      } else return resolve(result);
+    });
+  });
+}

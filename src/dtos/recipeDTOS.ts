@@ -49,4 +49,5 @@ export interface RecipeFilterDTO {
   category?: RecipeCategory;
   duration?: string;
   owner?: string;
+  q?: string;
 }

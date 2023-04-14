@@ -71,7 +71,12 @@ export function validateRecipeFilters(filters: RecipeFilterDTO) {
     owner: Joi.number().integer().positive().min(1),
     category: Joi.string().valid("food", "drink", "appetizer", "dessert"),
     duration: Joi.number().integer().positive().min(5),
+    q: Joi.string().min(3),
   })
     .options({ abortEarly: false })
     .validate(filters);
+}
+
+export function validateRecipeId(input: { recipeId: string }) {
+  return Joi.object({ recipeId: Joi.number().positive() }).validate(input);
 }

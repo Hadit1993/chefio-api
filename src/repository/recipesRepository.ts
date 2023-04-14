@@ -1,12 +1,19 @@
+import { dbConnection } from "../configs/dbConfig";
+import { NO_RECIPE_FOUND } from "../constants/messages";
+import { LikeDTO } from "../dtos/likeDto";
 import {
   CreateRecipeDTO,
-  RecipeDetailResultDTO,
   RecipeFilterDTO,
   RecipeResultDTO,
   RecipeStepDTO,
 } from "../dtos/recipeDTOS";
-import handleQuery from "../handlers/queryHandler";
+import { RecipeEntity } from "../entities/recipeEntity";
+import handleQuery, {
+  handleQueryInTransaction,
+} from "../handlers/queryHandler";
 import { snakeToCamel } from "../transformers/snakeToCamelTransformer";
+import { HttpError } from "../utils/commonTypes";
+import notificationsRepository from "./notificationsRepository";
 
 async function addRecipe(
   recipe: Omit<CreateRecipeDTO, "ingredients" | "steps">
@@ -62,7 +69,7 @@ async function findAllRecipes(
   const conditions: any[] = [];
   const values: any[] = [];
   let query =
-    "SELECT recipes.*, users.user_id as user_id, users.username as username, users.profile_image as profile_image FROM recipes JOIN users ON recipes.recipe_owner = users.user_id";
+    "SELECT recipes.*, users.user_id, users.username, users.profile_image FROM recipes JOIN users ON recipes.recipe_owner = users.user_id";
 
   if (filter.category) {
     conditions.push("recipes.recipe_category = ?");
@@ -77,6 +84,10 @@ async function findAllRecipes(
   if (filter.owner) {
     conditions.push("recipes.recipe_owner = ?");
     values.push(filter.owner);
+  }
+  if (filter.q) {
+    conditions.push("recipes.recipe_name LIKE ?");
+    values.push(`%${filter.q}%`);
   }
 
   if (conditions.length > 0) {
@@ -97,7 +108,7 @@ async function findAllRecipes(
   });
 }
 
-async function findRecipeById(recipeId: number) {
+async function findRecipeDetailById(recipeId: number) {
   const result = (await handleQuery(
     `
   SELECT r.*, u.user_id, u.username, u.profile_image , i.ingredient_name, ri.amount, ri.unit, rs.step_number, rs.step_description, rs.step_image
@@ -168,11 +179,114 @@ async function findRecipeById(recipeId: number) {
   return { ...recipe, ingredients, steps };
 }
 
+async function checkIfRecipeExists(recipeId: number): Promise<boolean> {
+  const result = await handleQuery(
+    "SELECT EXISTS (SELECT 1 from recipes WHERE recipe_id = ?)",
+    recipeId
+  );
+  console.log("result", result);
+  return !!result[0].exists;
+}
+
+async function findRecipeById(
+  recipeId: number
+): Promise<RecipeEntity | undefined> {
+  const results: any[] = await handleQuery(
+    "SELECT * FROM recipes WHERE recipe_id = ?",
+    recipeId
+  );
+  if (results.length === 0) return undefined;
+  return snakeToCamel(results[0]);
+}
+
+async function checkIfLikeExists(like: LikeDTO): Promise<boolean> {
+  const results = await handleQuery(
+    "SELECT EXISTS (SELECT 1 from likes WHERE recipe_id = ? AND like_owner = ?) AS result",
+    [like.recipeId, like.likeOwner]
+  );
+  return !!results[0].result;
+}
+
+async function insertRecipeLike(like: LikeDTO) {
+  await handleQueryInTransaction(
+    "INSERT INTO likes (like_owner, recipe_id) VALUES(?, ?)",
+    [like.likeOwner, like.recipeId]
+  );
+}
+
+async function deleteRecipeLike(like: LikeDTO) {
+  await handleQueryInTransaction(
+    "DELETE FROM likes WHERE like_owner = ? AND recipe_id = ?",
+    [like.likeOwner, like.recipeId]
+  );
+}
+
+async function likeRecipe(like: LikeDTO, recipeOwner: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    dbConnection.beginTransaction(async (error) => {
+      try {
+        if (error) throw new HttpError(error.message, 400);
+
+        await insertRecipeLike(like);
+        await notificationsRepository.addNotification({
+          notifOwner: recipeOwner,
+          notifEmitter: like.likeOwner,
+          recipeId: like.recipeId,
+          notifType: "like",
+        });
+
+        dbConnection.commit((commitError) => {
+          if (commitError) {
+            dbConnection.rollback(() => {
+              throw new HttpError(commitError.message, 400);
+            });
+          } else return resolve();
+        });
+      } catch (error) {
+        return reject(error);
+      }
+    });
+  });
+}
+
+async function unlikeRecipe(like: LikeDTO, recipeOwner: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    dbConnection.beginTransaction(async (error) => {
+      try {
+        if (error) throw new HttpError(error.message, 400);
+
+        await deleteRecipeLike(like);
+        await notificationsRepository.deleteNotification({
+          notifOwner: recipeOwner,
+          notifEmitter: like.likeOwner,
+          recipeId: like.recipeId,
+          notifType: "like",
+        });
+
+        dbConnection.commit((commitError) => {
+          if (commitError) {
+            dbConnection.rollback(() => {
+              throw new HttpError(commitError.message, 400);
+            });
+          } else return resolve();
+        });
+      } catch (error) {
+        return reject(error);
+      }
+    });
+  });
+}
+
 const recipesRepository = {
   addRecipe,
   addRecipeIngredient,
   addRecipeStep,
   findAllRecipes,
+  findRecipeDetailById,
+  checkIfRecipeExists,
+  checkIfLikeExists,
+  likeRecipe,
   findRecipeById,
+  unlikeRecipe,
 };
 export default recipesRepository;

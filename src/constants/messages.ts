@@ -43,3 +43,7 @@ export const INVALID_FILE_FIELD =
   "Invalid field name. Please make sure that the field name of the uploaded image file is either 'recipeCoverImage' or 'stepXImage', where X is the step number.";
 
 export const REQUIRED_RECIPE_IMAGE = "recipeCoverImage is required.";
+
+export const NO_RECIPE_FOUND = "No recipe found with this id.";
+
+export const RECIPE_ALREADY_LIKED = "This recipe has been liked already.";
