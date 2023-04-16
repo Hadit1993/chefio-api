@@ -6,3 +6,19 @@ export interface AddNotificationDTO {
   notifEmitter: number;
   recipeId?: number;
 }
+
+export interface NotificationResultDto {
+  notifId: number;
+  notifType: NotifType;
+  notifEmitter: {
+    user_id: number;
+    username: string;
+    profileImage?: string;
+  };
+  recipe?: {
+    recipeId: number;
+    recipeCoverImage: string;
+  };
+  notifIsRead: boolean;
+  notifDate: Date;
+}

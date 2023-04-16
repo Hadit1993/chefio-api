@@ -22,7 +22,7 @@ export function validateRecipe(recipe: CreateRecipeDTO) {
   return Joi.object({
     recipeName: Joi.string().min(3).required(),
     recipeDescription: Joi.string().min(10),
-    coockingDuration: Joi.number().integer().positive().min(5).required(),
+    cookingDuration: Joi.number().integer().positive().min(5).required(),
     recipeCategory: Joi.string()
       .valid("food", "drink", "appetizer", "dessert")
       .required(),

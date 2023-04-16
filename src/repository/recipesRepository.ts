@@ -18,7 +18,7 @@ import notificationsRepository from "./notificationsRepository";
 async function addRecipe(
   recipe: Omit<CreateRecipeDTO, "ingredients" | "steps">
 ): Promise<number> {
-  const result: any = await handleQuery(
+  const result: any = await handleQueryInTransaction(
     "INSERT INTO recipes (recipe_name, recipe_description, recipe_cover_image, cooking_duration, recipe_owner, recipe_category) VALUES(?, ?, ?, ?, ?, ?)",
     [
       recipe.recipeName,
@@ -39,7 +39,7 @@ async function addRecipeIngredient(input: {
   amount: number;
   unit?: string;
 }): Promise<number> {
-  const result: any = await handleQuery(
+  const result: any = await handleQueryInTransaction(
     "INSERT INTO recipe_ingredients (ingredient_id, recipe_id, amount, unit) VALUES(?, ?, ?, ?)",
     [input.ingredientId, input.recipeId, input.amount, input.unit]
   );
@@ -51,7 +51,7 @@ async function addRecipeStep(
   step: RecipeStepDTO,
   recipeId: number
 ): Promise<number> {
-  const result = await handleQuery(
+  const result = await handleQueryInTransaction(
     "INSERT INTO recipe_steps (recipe_id, step_number, step_description, step_image) VALUES(?, ?, ?, ?)",
     [recipeId, step.stepNumber, step.stepDescription, step.stepImage]
   );
@@ -228,12 +228,14 @@ async function likeRecipe(like: LikeDTO, recipeOwner: number): Promise<void> {
         if (error) throw new HttpError(error.message, 400);
 
         await insertRecipeLike(like);
-        await notificationsRepository.addNotification({
-          notifOwner: recipeOwner,
-          notifEmitter: like.likeOwner,
-          recipeId: like.recipeId,
-          notifType: "like",
-        });
+        if (recipeOwner !== like.likeOwner) {
+          await notificationsRepository.addNotification({
+            notifOwner: recipeOwner,
+            notifEmitter: like.likeOwner,
+            recipeId: like.recipeId,
+            notifType: "like",
+          });
+        }
 
         dbConnection.commit((commitError) => {
           if (commitError) {
@@ -256,12 +258,14 @@ async function unlikeRecipe(like: LikeDTO, recipeOwner: number): Promise<void> {
         if (error) throw new HttpError(error.message, 400);
 
         await deleteRecipeLike(like);
-        await notificationsRepository.deleteNotification({
-          notifOwner: recipeOwner,
-          notifEmitter: like.likeOwner,
-          recipeId: like.recipeId,
-          notifType: "like",
-        });
+
+        if (recipeOwner !== like.likeOwner)
+          await notificationsRepository.deleteNotification({
+            notifOwner: recipeOwner,
+            notifEmitter: like.likeOwner,
+            recipeId: like.recipeId,
+            notifType: "like",
+          });
 
         dbConnection.commit((commitError) => {
           if (commitError) {

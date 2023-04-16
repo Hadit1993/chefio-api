@@ -1,3 +1,4 @@
+import { dbConnection } from "../configs/dbConfig";
 import {
   NO_RECIPE_FOUND,
   RECIPE_ALREADY_LIKED,
@@ -33,15 +34,32 @@ async function addRecipe(
     "recipe"
   );
   recipe.recipeCoverImage = recipeCoverImageUrl;
-  const recipeId = await recipesRepository.addRecipe(recipe);
 
-  for (const ingredient of recipe.ingredients) {
-    await addRecipeIngredient(ingredient, recipeId);
-  }
+  const transactionResult: Promise<void> = new Promise((resolve, reject) => {
+    dbConnection.beginTransaction(async (error) => {
+      try {
+        if (error) throw new HttpError(error.message, 400);
+        const recipeId = await recipesRepository.addRecipe(recipe);
 
-  for (const step of recipe.steps) {
-    await addRecipeStep(step, recipeFiles, recipeId);
-  }
+        for (const ingredient of recipe.ingredients) {
+          await addRecipeIngredient(ingredient, recipeId);
+        }
+
+        for (const step of recipe.steps) {
+          await addRecipeStep(step, recipeFiles, recipeId);
+        }
+
+        dbConnection.commit((commitError) => {
+          if (commitError) throw new HttpError(commitError.message, 400);
+          return resolve();
+        });
+      } catch (error) {
+        return reject(error);
+      }
+    });
+  });
+
+  await transactionResult;
 }
 
 async function addRecipeIngredient(

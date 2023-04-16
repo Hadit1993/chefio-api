@@ -1,3 +1,5 @@
+import { Paginate } from "../generalTypes";
+
 export type RecipeCategory = "food" | "drink" | "appetizer" | "dessert";
 
 export interface CreateRecipeDTO {
@@ -43,9 +45,7 @@ export interface RecipeDetailResultDTO extends RecipeResultDTO {
   steps: Omit<RecipeStepDTO, "recipeId">[];
 }
 
-export interface RecipeFilterDTO {
-  page?: string;
-  limit?: string;
+export interface RecipeFilterDTO extends Paginate {
   category?: RecipeCategory;
   duration?: string;
   owner?: string;
