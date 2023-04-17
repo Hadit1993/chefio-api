@@ -12,6 +12,7 @@ import {
   RecipeResultDTO,
   RecipeStepDTO,
 } from "../dtos/recipeDTOS";
+import { PaginateData } from "../generalTypes";
 import uploadToImageKit from "../handlers/imageKitUploadHandler";
 import recipesRepository from "../repository/recipesRepository";
 import { HttpError } from "../utils/commonTypes";
@@ -99,7 +100,9 @@ async function addRecipeStep(
   await recipesRepository.addRecipeStep(step, recipeId);
 }
 
-function findAllRecipes(filter: RecipeFilterDTO): Promise<RecipeResultDTO[]> {
+function findAllRecipes(
+  filter: RecipeFilterDTO
+): Promise<PaginateData<RecipeResultDTO>> {
   return recipesRepository.findAllRecipes(filter);
 }
 

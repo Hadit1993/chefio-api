@@ -8,6 +8,7 @@ import {
   RecipeStepDTO,
 } from "../dtos/recipeDTOS";
 import { RecipeEntity } from "../entities/recipeEntity";
+import { PaginateData } from "../generalTypes";
 import handleQuery, {
   handleQueryInTransaction,
 } from "../handlers/queryHandler";
@@ -61,7 +62,7 @@ async function addRecipeStep(
 
 async function findAllRecipes(
   filter: RecipeFilterDTO
-): Promise<RecipeResultDTO[]> {
+): Promise<PaginateData<RecipeResultDTO>> {
   const page = parseInt(filter.page!);
   const limit = parseInt(filter.limit!);
   const offset = (page - 1) * limit;
@@ -94,6 +95,8 @@ async function findAllRecipes(
     query += ` WHERE ${conditions.join(" AND ")}`;
   }
 
+  const recipesTotalCount = await getNumberofRecipes(conditions, values);
+
   query += " LIMIT ? OFFSET ?";
   values.push(limit);
   values.push(offset);
@@ -102,10 +105,31 @@ async function findAllRecipes(
 
   const transformedResult = result.map((val) => snakeToCamel(val)) as any[];
 
-  return transformedResult.map((val) => {
+  const data = transformedResult.map((val) => {
     const { recipeOwner, userId, username, profileImage, ...recipe } = val;
     return { ...recipe, recipeOwner: { userId, username, profileImage } };
   });
+
+  return {
+    data,
+    page,
+    limit,
+    totalCount: recipesTotalCount,
+  };
+}
+
+async function getNumberofRecipes(
+  conditions: any[],
+  values: any[]
+): Promise<number> {
+  let query = "SELECT COUNT(*) FROM recipes";
+
+  if (conditions.length > 0) {
+    query += ` WHERE ${conditions.join(" AND ")}`;
+  }
+
+  const results = await handleQuery(query, values);
+  return results[0]["COUNT(*)"];
 }
 
 async function findRecipeDetailById(recipeId: number) {

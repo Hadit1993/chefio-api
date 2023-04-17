@@ -1,17 +1,17 @@
 import { NotificationResultDto } from "../dtos/notificationDto";
-import { Paginate } from "../generalTypes";
+import { Paginate, PaginateData } from "../generalTypes";
 import notificationsRepository from "../repository/notificationsRepository";
 
 async function getNotifications(
   paginate: Required<Paginate>,
   userId: number
-): Promise<NotificationResultDto[]> {
+): Promise<PaginateData<NotificationResultDto>> {
   const notifs = await notificationsRepository.getNotifications(
     paginate,
     userId
   );
   await notificationsRepository.readNotifications(
-    notifs.map((val) => val.notifId)
+    notifs.data.map((val) => val.notifId)
   );
   return notifs;
 }

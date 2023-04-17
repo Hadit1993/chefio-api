@@ -2,7 +2,7 @@ import {
   AddNotificationDTO,
   NotificationResultDto,
 } from "../dtos/notificationDto";
-import { Paginate } from "../generalTypes";
+import { Paginate, PaginateData } from "../generalTypes";
 import handleQuery, {
   handleQueryInTransaction,
 } from "../handlers/queryHandler";
@@ -31,7 +31,7 @@ async function deleteNotification(notif: AddNotificationDTO) {
 async function getNotifications(
   paginate: Required<Paginate>,
   userId: number
-): Promise<NotificationResultDto[]> {
+): Promise<PaginateData<NotificationResultDto>> {
   const page = parseInt(paginate.page);
   const limit = parseInt(paginate.limit);
   const offset = (page - 1) * limit;
@@ -68,7 +68,15 @@ async function getNotifications(
     };
   });
 
-  return transformedNotifs;
+  const totalNotifsCount = await getNumberofNotifications(userId);
+
+  return { data: transformedNotifs, page, limit, totalCount: totalNotifsCount };
+}
+
+async function getNumberofNotifications(userId: number): Promise<number> {
+  let query = "SELECT COUNT(*) FROM notifications WHERE notif_owner = ?";
+  const results = await handleQuery(query, userId);
+  return results[0]["COUNT(*)"];
 }
 
 async function readNotifications(notifIds: number[]) {
